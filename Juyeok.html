@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주역점 · 周易占</title>
+<style>
+  :root{
+    --ink:#15110b; --ink2:#1e1710; --panel:#241b11;
+    --hanji:#e9ddc4; --hanji2:#e1d3b6; --paper-ink:#2c241a;
+    --vermilion:#b5392b; --vermilion-deep:#8f2a20;
+    --gold:#c2a25a; --gold-soft:#d8c79c; --muted:#9a8a6c;
+    --line:#cdb274;
+    --display:"Nanum Myeongjo","Batang","바탕","AppleMyungjo",serif;
+    --body:"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--body);
+    background:
+      radial-gradient(120% 80% at 50% -10%, #271d12 0%, var(--ink) 55%, #100c07 100%);
+    color:var(--gold-soft);
+    min-height:100vh;
+    min-height:100dvh;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;z-index:0;
+    background-image:radial-gradient(rgba(194,162,90,.05) 1px,transparent 1px);
+    background-size:22px 22px;
+  }
+  .wrap{position:relative;z-index:1;max-width:600px;margin:0 auto;padding:42px 20px 64px}
+
+  /* ---- header ---- */
+  .brand{text-align:center;margin-bottom:30px}
+  .brand .han{font-family:var(--display);color:var(--vermilion);font-size:15px;letter-spacing:.5em;
+    text-indent:.5em;margin:0 0 6px;font-weight:700}
+  .brand h1{font-family:var(--display);font-weight:700;color:var(--hanji);
+    font-size:clamp(40px,11vw,60px);margin:0;letter-spacing:.12em;text-indent:.12em;line-height:1}
+  .brand .rule{width:46px;height:2px;background:var(--gold);margin:18px auto 0;opacity:.7}
+
+  .stage{position:relative}
+
+  /* ---- intro ---- */
+  .lede{text-align:center;color:var(--muted);font-size:15px;max-width:30em;margin:0 auto 30px}
+  .ask{margin:0 auto 26px;max-width:420px}
+  .ask label{display:block;font-family:var(--display);color:var(--gold-soft);
+    font-size:15px;margin-bottom:10px;text-align:center;letter-spacing:.04em}
+  .ask textarea{
+    width:100%;min-height:84px;resize:vertical;border-radius:3px;
+    background:rgba(233,221,196,.04);color:var(--hanji);
+    border:1px solid rgba(194,162,90,.32);padding:13px 14px;font-family:var(--body);
+    font-size:15px;line-height:1.6;outline:none;transition:border-color .2s,box-shadow .2s}
+  .ask textarea::placeholder{color:#6f6450}
+  .ask textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(194,162,90,.15)}
+
+  /* ---- buttons ---- */
+  .btn{
+    display:block;width:100%;max-width:300px;margin:0 auto;cursor:pointer;
+    font-family:var(--display);font-size:18px;letter-spacing:.14em;text-indent:.14em;
+    color:var(--ink);font-weight:700;border:none;border-radius:3px;padding:16px 20px;
+    background:linear-gradient(180deg,#d8bd79,#bd9c4f);
+    box-shadow:0 6px 22px -8px rgba(189,156,79,.6), inset 0 1px 0 rgba(255,255,255,.35);
+    transition:transform .12s ease, box-shadow .2s, filter .2s}
+  .btn:hover{filter:brightness(1.05)}
+  .btn:active{transform:translateY(1px)}
+  .btn:disabled{filter:grayscale(.4) brightness(.7);cursor:default;box-shadow:none}
+  .btn.ghost{background:none;color:var(--gold-soft);border:1px solid rgba(194,162,90,.4);
+    box-shadow:none;font-size:15px}
+  .btn.ghost:hover{background:rgba(194,162,90,.08);filter:none}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+  /* ---- casting panel ---- */
+  .scroll{
+    margin:0 auto 28px;width:200px;background:
+      linear-gradient(180deg,var(--hanji),var(--hanji2));
+    border-radius:4px;padding:26px 0 22px;position:relative;
+    box-shadow:0 18px 50px -22px rgba(0,0,0,.8), inset 0 0 0 1px rgba(120,95,45,.18);
+  }
+  .scroll::before,.scroll::after{content:"";position:absolute;left:-9px;right:-9px;height:13px;
+    background:linear-gradient(180deg,#3a2c18,#221a0f);border-radius:3px}
+  .scroll::before{top:-9px}.scroll::after{bottom:-9px}
+  .lines{display:flex;flex-direction:column;gap:13px;align-items:center}
+  .ln{display:flex;align-items:center;gap:9px;height:18px}
+  .seg{width:64px;height:16px;border-radius:2px;background:transparent;
+    border:1px dashed rgba(120,95,45,.4)}
+  .ln.set .seg{border:none;background:linear-gradient(180deg,#4a3a1f,#2e2312);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+  .ln.yin{gap:9px}
+  .ln .gap{width:18px}
+  .ln.draw{animation:brush .5s ease both}
+  @keyframes brush{from{-webkit-clip-path:inset(0 100% 0 0);clip-path:inset(0 100% 0 0);opacity:0}to{-webkit-clip-path:inset(0 0 0 0);clip-path:inset(0 0 0 0);opacity:1}}
+  .mark{width:13px;font-family:var(--display);color:var(--vermilion);font-size:14px;
+    font-weight:700;text-align:center}
+  .ln.moving .seg{box-shadow:inset 0 0 0 1px rgba(181,57,43,.55),0 0 10px -2px rgba(181,57,43,.5)}
+
+  .coins{display:flex;gap:18px;justify-content:center;margin:6px auto 22px;
+    -webkit-perspective:800px;perspective:800px}
+  .coin{width:62px;height:62px;position:relative}
+  .coin-inner{width:100%;height:100%;position:relative;
+    -webkit-transform-style:preserve-3d;transform-style:preserve-3d;
+    -webkit-transform:rotateY(0deg);transform:rotateY(0deg);transition:transform .25s}
+  .face{position:absolute;inset:0;border-radius:50%;
+    -webkit-backface-visibility:hidden;backface-visibility:hidden;
+    display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 38% 32%,#e7c878,#b48f43 60%,#7d6128);
+    box-shadow:inset 0 0 0 2px rgba(255,240,200,.35),inset 0 -4px 8px rgba(80,58,20,.5),
+      0 5px 12px -5px rgba(0,0,0,.7)}
+  .face.back{-webkit-transform:rotateY(180deg);transform:rotateY(180deg);
+    background:radial-gradient(circle at 38% 32%,#cdb066,#9c7c3a 60%,#6b5223)}
+  .face .hole{position:absolute;width:17px;height:17px;background:var(--ink);border-radius:2px;
+    box-shadow:inset 0 0 0 1px rgba(255,240,200,.18)}
+  .face .ch{position:absolute;font-family:var(--display);color:#5e4715;font-weight:700;font-size:13px}
+  .face .ch.t{top:5px}.face .ch.b{bottom:5px}.face .ch.l{left:7px}.face .ch.r{right:7px}
+  .face.back .ch{opacity:0}
+
+  .caster{text-align:center}
+  .progress{font-family:var(--display);color:var(--gold);letter-spacing:.2em;
+    font-size:14px;margin:0 0 6px}
+  .toss-note{min-height:24px;color:var(--gold-soft);font-size:14px;margin:14px 0 18px;
+    font-family:var(--display);letter-spacing:.03em}
+  .toss-note b{color:var(--vermilion);font-weight:700}
+
+  /* ---- result ---- */
+  .result{animation:rise .6s ease both}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .qline{text-align:center;color:var(--muted);font-size:14px;margin:0 0 22px;font-style:italic}
+  .qline span{color:var(--gold-soft)}
+  .card{position:relative;background:linear-gradient(180deg,var(--hanji),var(--hanji2));
+    color:var(--paper-ink);border-radius:6px;padding:28px 26px 26px;
+    box-shadow:0 24px 60px -28px rgba(0,0,0,.85),inset 0 0 0 1px rgba(120,95,45,.2);margin-bottom:8px}
+  .card .no{font-family:var(--display);color:var(--vermilion);font-size:13px;
+    letter-spacing:.3em;margin:0 0 4px}
+  .card .nm{font-family:var(--display);font-weight:700;font-size:clamp(26px,7vw,34px);
+    margin:0;line-height:1.15;color:#26201a}
+  .card .nm small{font-size:.62em;color:#7a6a4e;font-weight:400;margin-left:.5em;letter-spacing:.05em}
+  .trig{display:flex;gap:18px;margin:14px 0 2px;font-size:13px;color:#6c5d44}
+  .trig b{font-family:var(--display);color:#3c3325;font-weight:700;font-size:15px}
+  .glyphs{display:flex;flex-direction:column;align-items:center;gap:10px;
+    margin:22px auto;width:fit-content}
+  .gl{display:flex;align-items:center;gap:8px;height:15px}
+  .gl .bar{height:13px;border-radius:2px;background:linear-gradient(180deg,#3a2c18,#241b10)}
+  .gl .bar.full{width:78px}.gl .bar.half{width:32px}
+  .gl .gp{width:14px}
+  .gl .mk{width:14px;color:var(--vermilion);font-family:var(--display);font-weight:700;font-size:13px;text-align:center}
+  .gl.mv .bar{box-shadow:0 0 9px -2px rgba(181,57,43,.6),inset 0 0 0 1px rgba(181,57,43,.5)}
+  .chip{display:inline-block;font-family:var(--display);background:rgba(181,57,43,.1);
+    color:var(--vermilion-deep);border:1px solid rgba(181,57,43,.3);border-radius:999px;
+    padding:5px 15px;font-size:14px;font-weight:700;margin:2px 0 16px}
+  .card p{margin:0 0 14px;font-size:15.5px;color:#3a3225;line-height:1.78}
+  .advice{border-top:1px solid rgba(120,95,45,.25);padding-top:14px;margin-top:4px;
+    font-family:var(--display);color:#7a3327;font-size:15px}
+  .advice b{color:var(--vermilion-deep)}
+  .seal{position:absolute;right:20px;bottom:18px;width:54px;height:54px;border-radius:6px;
+    border:2.5px solid var(--vermilion);color:var(--vermilion);font-family:var(--display);
+    font-weight:700;display:flex;align-items:center;justify-content:center;text-align:center;
+    font-size:14px;line-height:1.05;transform:rotate(-7deg);opacity:.92;
+    box-shadow:inset 0 0 0 2px rgba(181,57,43,.25)}
+
+  .arrow{text-align:center;font-family:var(--display);color:var(--gold);letter-spacing:.15em;
+    font-size:15px;margin:20px 0}
+  .arrow b{color:var(--vermilion);font-weight:700}
+  .movenote{background:rgba(181,57,43,.06);border:1px solid rgba(194,162,90,.25);
+    border-radius:6px;padding:14px 18px;color:var(--gold-soft);font-size:14px;margin:0 0 18px}
+  .movenote b{color:var(--vermilion);font-family:var(--display)}
+  .nochange{text-align:center;color:var(--muted);font-size:14px;margin:0 0 18px}
+
+  .actions{margin-top:26px;display:flex;flex-direction:column;gap:12px}
+  .foot{text-align:center;color:#6a5f49;font-size:12px;margin-top:34px;line-height:1.6}
+  .hidden{display:none !important}
+
+  @media(max-width:420px){
+    .scroll{width:184px}.seg{width:58px}.gl .bar.full{width:70px}
+    .coin{width:54px;height:54px}.coins{gap:14px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .ln.draw,.result{animation:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="brand">
+    <p class="han">周易占</p>
+    <h1>주역점</h1>
+    <div class="rule"></div>
+  </header>
+
+  <main class="stage">
+
+    <!-- INTRO -->
+    <section id="intro">
+      <p class="lede">마음을 가다듬고 한 가지 일을 정성껏 떠올리세요. 동전 세 닢을 여섯 번 던져 하나의 괘를 얻고, 그 괘로 묻고자 하는 바를 풀이합니다.</p>
+      <div class="ask">
+        <label for="q">묻고 싶은 것</label>
+        <textarea id="q" placeholder="예) 지금 준비하는 일을 계속 밀고 나가도 될까?  (비워 두어도 됩니다)"></textarea>
+      </div>
+      <button class="btn" id="start">점괘를 청하다</button>
+    </section>
+
+    <!-- CASTING -->
+    <section id="cast" class="hidden">
+      <div class="scroll"><div class="lines" id="lines"></div></div>
+      <div class="caster">
+        <p class="progress" id="prog">제 1 효</p>
+        <div class="coins" id="coins"></div>
+        <p class="toss-note" id="note">동전 세 닢을 던져 아래에서부터 한 효씩 세웁니다.</p>
+        <button class="btn" id="toss">동전 던지기</button>
+      </div>
+    </section>
+
+    <!-- RESULT -->
+    <section id="result" class="hidden"></section>
+
+  </main>
+
+  <p class="foot">주역 64괘에 기대어 스스로를 비추어 보는 도구입니다.<br>점괘는 마음을 살피는 거울로 삼으시고, 선택과 책임은 늘 자신에게 있습니다.</p>
+</div>
+
+<script>
+const HEX = {
+'111111':{n:1,k:'건위천',h:'乾爲天',key:'굳센 창조, 자강불식',t:'하늘의 강건한 기운이 거듭된 대길의 괘입니다. 큰 뜻이 형통하니 바르게 나아가면 이롭습니다. 다만 끝까지 차오른 용은 후회가 따르니 지나친 강함과 교만을 경계해야 합니다.',a:'스스로 힘쓰기를 멈추지 말되, 정점에서는 물러설 줄 아십시오.'},
+'000000':{n:2,k:'곤위지',h:'坤爲地',key:'너그러운 포용, 후덕재물',t:'땅의 유순하고 두터운 덕을 상징합니다. 앞장서면 길을 잃고 뒤따르면 주인을 얻으니, 받아들이고 기르는 자리에 머무를 때 형통합니다.',a:'앞서 다투기보다 따르고 품으며 묵묵히 쌓으십시오.'},
+'100010':{n:3,k:'수뢰둔',h:'水雷屯',key:'태동의 어려움',t:'만물이 처음 생겨날 때의 험난함입니다. 나아가기 어렵고 머뭇거리게 되나, 함부로 움직이지 않고 조력자를 세우면 길이 열립니다.',a:'서두르지 말고 기반과 사람을 먼저 세우십시오.'},
+'010001':{n:4,k:'산수몽',h:'山水蒙',key:'어림과 배움',t:'어리고 몽매하여 길을 모르는 형국입니다. 내가 어린이를 구하는 것이 아니라 어린이가 나를 찾아야 하니, 정성으로 묻고 가르침을 받으면 형통합니다.',a:'모르는 것을 부끄러워 말고 바른 스승에게 배우십시오.'},
+'111010':{n:5,k:'수천수',h:'水天需',key:'기다림',t:'위험이 앞에 있으나 힘으로 뚫지 않고 때를 기다리는 괘입니다. 믿음을 가지고 기다리면 빛나고 형통하여 큰 강을 건너도 이롭습니다.',a:'조급함을 버리고 힘을 기르는 여유로 때를 기다리십시오.'},
+'010111':{n:6,k:'천수송',h:'天水訟',key:'다툼과 송사',t:'하늘과 물이 어긋나 다툼이 생기는 형국입니다. 믿음이 막혀 두려우니, 중도에 그치면 길하나 끝까지 다투면 흉합니다.',a:'이기려 끝까지 가지 말고 공정한 이를 찾아 화해하십시오.'},
+'010000':{n:7,k:'지수사',h:'地水師',key:'군대와 통솔',t:'땅속의 물처럼 무리를 이끄는 괘입니다. 명분이 바르고 노련한 사람이 이끌면 허물이 없습니다.',a:'엄정한 기율과 바른 명분으로 무리를 이끄십시오.'},
+'000010':{n:8,k:'수지비',h:'水地比',key:'친밀한 연대',t:'물이 땅 위를 적시듯 서로 가까이 돕고 따르는 괘입니다. 늦게 오는 자는 흉하니, 진심으로 어울릴 때를 놓치지 마십시오.',a:'좋은 사람과 때맞춰 손잡고 진실하게 어울리십시오.'},
+'111011':{n:9,k:'풍천소축',h:'風天小畜',key:'작게 쌓음, 잠시 멈춤',t:'부드러운 바람이 굳센 하늘을 잠시 멈춰 세우는 작은 저축의 괘입니다. 빽빽한 구름이 아직 비가 되지 못하니 크게 이루기엔 이릅니다.',a:'작은 것을 꾸준히 쌓으며 큰 때를 기다리십시오.'},
+'110111':{n:10,k:'천택리',h:'天澤履',key:'조심스레 밟는 길',t:'호랑이 꼬리를 밟아도 물지 않는 형국입니다. 예의와 조심으로 위태로운 곳을 지나면 형통합니다.',a:'분수를 지키고 예를 갖추어 신중히 행하십시오.'},
+'111000':{n:11,k:'지천태',h:'地天泰',key:'통함과 태평',t:'하늘과 땅의 기운이 사귀어 만물이 통하는 대길의 괘입니다. 작은 것이 가고 큰 것이 오니 형통합니다.',a:'통하는 때를 누리되 교만하지 말고 조화를 지키십시오.'},
+'000111':{n:12,k:'천지비',h:'天地否',key:'막힘과 단절',t:'하늘과 땅이 사귀지 못해 통하지 않는 막힘의 괘입니다. 소인의 도가 자라니 바른 이는 물러나 때를 지킵니다.',a:'무리하게 밀어붙이지 말고 안으로 바름을 지키며 때를 기다리십시오.'},
+'101111':{n:13,k:'천화동인',h:'天火同人',key:'뜻을 같이함',t:'하늘 아래 불이 밝듯 사람들과 뜻을 함께하는 괘입니다. 들에서 널리 함께하면 형통하여 큰 강을 건너도 이롭습니다.',a:'사사로움을 넘어 공정하게 사람들과 뜻을 모으십시오.'},
+'111101':{n:14,k:'화천대유',h:'火天大有',key:'크게 가짐',t:'불이 하늘 위에서 빛나 크게 소유하는 풍요의 괘입니다. 크게 형통하나 가득 찼을 때일수록 겸손해야 합니다.',a:'가진 것을 베풀고 교만을 경계하면 복이 이어집니다.'},
+'001000':{n:15,k:'지산겸',h:'地山謙',key:'겸손',t:'높은 산이 땅 아래 낮추는 겸손의 괘입니다. 군자가 끝까지 겸손하니 형통하고 길합니다.',a:'공이 있어도 낮추면 더욱 높아집니다.'},
+'000100':{n:16,k:'뇌지예',h:'雷地豫',key:'기쁨과 대비',t:'우레가 땅 위로 떨치니 기쁨과 즐거움의 괘입니다. 미리 대비하고 분수를 지키면 이로우나 안일에 빠지면 위태롭습니다.',a:'즐거움 속에서도 미리 준비하고 도리를 지키십시오.'},
+'100110':{n:17,k:'택뢰수',h:'澤雷隨',key:'따름',t:'우레가 못 속에 잠겨 때를 따르는 괘입니다. 바르게 따르면 크게 형통하여 허물이 없습니다.',a:'고집을 버리고 바른 때와 사람을 따르십시오.'},
+'011001':{n:18,k:'산풍고',h:'山風蠱',key:'폐단을 바로잡음',t:'바람이 산 아래 막혀 일이 부패한 형국입니다. 묵은 폐단을 바로잡으면 크게 형통하니, 큰 강을 건너도 이롭습니다.',a:'미루지 말고 적극적으로 묵은 문제를 바로잡으십시오.'},
+'110000':{n:19,k:'지택림',h:'地澤臨',key:'다가가 임함',t:'땅이 못에 임하듯 큰 것이 자라 다가가는 괘입니다. 크게 형통하나 여덟 달이 지나면 흉함이 있으니 때를 살펴야 합니다.',a:'기세가 좋을 때 바르게 임하되 쇠할 때를 미리 생각하십시오.'},
+'000011':{n:20,k:'풍지관',h:'風地觀',key:'살펴봄',t:'바람이 땅 위를 두루 부니 우러러보고 살피는 괘입니다. 정성으로 우러르면 사람들이 믿고 따릅니다.',a:'멀리 넓게 살피고, 스스로를 본보기로 삼으십시오.'},
+'100101':{n:21,k:'화뢰서합',h:'火雷噬嗑',key:'씹어 합함, 결단',t:'입 속의 장애물을 깨물어 끊는 형국입니다. 막힌 것을 결단으로 다스리면 형통하니, 법과 절차를 바르게 쓰기에 이롭습니다.',a:'방해물을 단호히 제거하고 공정하게 처결하십시오.'},
+'101001':{n:22,k:'산화비',h:'山火賁',key:'꾸밈과 문채',t:'산 아래 불빛이 아름답게 꾸미는 괘입니다. 작은 일에는 이로우나 꾸밈이 본질을 넘어서면 안 됩니다.',a:'겉을 다듬되 내실을 잃지 마십시오.'},
+'000001':{n:23,k:'산지박',h:'山地剝',key:'깎이고 무너짐',t:'산이 땅 위에서 깎여 내리는 쇠락의 괘입니다. 나아가면 이롭지 않으니, 움직이지 말고 지켜야 합니다.',a:'무리하지 말고 두텁게 아랫자리를 지키며 때를 기다리십시오.'},
+'100000':{n:24,k:'지뢰복',h:'地雷復',key:'돌아옴, 회복',t:'땅속에서 우레가 다시 살아나 양이 돌아오는 회복의 괘입니다. 나가고 들어옴에 허물이 없고, 마침내 본래의 길이 다시 열립니다.',a:'실수에서 돌이켜 본래의 바른 길로 돌아오십시오.'},
+'100111':{n:25,k:'천뢰무망',h:'天雷无妄',key:'거짓 없음, 순리',t:'하늘 아래 우레가 진동하니 망령됨 없이 순리를 따르는 괘입니다. 바르면 크게 형통하나, 바르지 않으면 재앙이 따릅니다.',a:'억지와 욕심을 버리고 자연의 이치에 맡기십시오.'},
+'111001':{n:26,k:'산천대축',h:'山天大畜',key:'크게 쌓음',t:'하늘을 산속에 가둔 듯 큰 힘을 크게 축적하는 괘입니다. 바르면 이롭고, 안주하지 않고 나아가 큰일을 하면 길합니다.',a:'덕과 실력을 크게 쌓아 큰 강을 건너십시오.'},
+'100001':{n:27,k:'산뢰이',h:'山雷頤',key:'기름, 먹고 기름',t:'위턱과 아래턱 사이 입의 형상으로, 기르고 먹는 도리를 말합니다. 무엇을 기르는지 살피면 길하니, 바른 것을 길러야 합니다.',a:'말과 음식을 절제하고 바른 것으로 몸과 마음을 기르십시오.'},
+'011110':{n:28,k:'택풍대과',h:'澤風大過',key:'크게 지나침',t:'들보가 휘어질 만큼 짐이 과중한 비상한 때의 괘입니다. 나아갈 바를 두면 이로워 형통하나, 홀로 버티는 위태로움이 있습니다.',a:'비상한 때엔 비상한 결단으로, 무너지기 전에 손을 쓰십시오.'},
+'010010':{n:29,k:'중수감',h:'重水坎',key:'거듭된 험난',t:'물이 거듭 빠지는 깊은 위험의 괘입니다. 믿음을 잃지 않으면 마음이 형통하여 행하면 숭상받습니다.',a:'위험할수록 진실한 마음을 지켜 한 걸음씩 빠져나오십시오.'},
+'101101':{n:30,k:'중화리',h:'重火離',key:'밝음에 걸림',t:'불이 거듭 빛나 밝음에 의지하는 괘입니다. 바름에 붙어 있으면 형통하니, 암소를 기르듯 유순하면 길합니다.',a:'바른 것에 마음을 붙이고 밝은 지혜로 유순하게 처신하십시오.'},
+'001110':{n:31,k:'택산함',h:'澤山咸',key:'느낌, 감응',t:'산 위의 못처럼 서로 감응하는 괘입니다. 남녀가 느껴 통하니 형통하고, 바르면 이로워 혼인에 길합니다.',a:'진심으로 느끼고 통하되 사사로운 욕심은 비우십시오.'},
+'011100':{n:32,k:'뇌풍항',h:'雷風恆',key:'한결같음, 항구',t:'우레와 바람이 함께하는 변치 않는 도리의 괘입니다. 오래 지속하면 형통하니, 나아갈 바를 두면 이롭습니다.',a:'흔들리지 말고 바른 도를 오래도록 지키십시오.'},
+'001111':{n:33,k:'천산둔',h:'天山遯',key:'물러남',t:'하늘 아래 산이 물러서는 은둔의 괘입니다. 작게 형통하니, 바르게 물러나는 것이 이롭습니다.',a:'맞서지 말고 때맞춰 물러나 자신을 지키십시오.'},
+'111100':{n:34,k:'뇌천대장',h:'雷天大壯',key:'크게 강성함',t:'우레가 하늘 위에 진동하는 강성한 기운의 괘입니다. 바르면 이로우나, 힘만 믿고 함부로 나아가면 뿔이 울타리에 걸립니다.',a:'강할 때일수록 예를 지키고 함부로 부딪치지 마십시오.'},
+'000101':{n:35,k:'화지진',h:'火地晉',key:'나아가 떠오름',t:'해가 땅 위로 떠오르듯 밝게 나아가는 전진의 괘입니다. 밝은 군주에게 인정받아 거듭 영접받는 길함이 있습니다.',a:'밝은 곳을 향해 떳떳하게 나아가십시오.'},
+'101000':{n:36,k:'지화명이',h:'地火明夷',key:'밝음이 상함',t:'밝은 해가 땅속으로 들어가 빛이 가려진 괘입니다. 어려운 때이니 안으로 밝음을 지키고 밖으로 어리석은 듯 처신하면 이롭습니다.',a:'재능을 감추고 바름을 지키며 어두운 때를 견디십시오.'},
+'101011':{n:37,k:'풍화가인',h:'風火家人',key:'집안 사람',t:'불에서 바람이 나오듯 집안의 도리를 말하는 괘입니다. 각자 자리를 바르게 지키면 집안이 바로 섭니다.',a:'안에서부터 도리를 바로 세우고 자기 자리를 지키십시오.'},
+'110101':{n:38,k:'화택규',h:'火澤睽',key:'어긋남',t:'불은 오르고 못은 내려 서로 등진 괘입니다. 작은 일에는 길하나 큰일은 어그러지기 쉽습니다.',a:'다름을 인정하며 작은 일부터 화합을 도모하십시오.'},
+'001010':{n:39,k:'수산건',h:'水山蹇',key:'막혀 절뚝임',t:'산 위에 물이 막혀 나아가기 험난한 괘입니다. 무리해 나아가기보다 큰 사람을 만나면 이롭습니다.',a:'무리해 나아가지 말고 돌이켜 자신을 닦으며 도움을 구하십시오.'},
+'010100':{n:40,k:'뇌수해',h:'雷水解',key:'풀림, 해소',t:'우레와 비가 일어나 얽힘이 풀리는 괘입니다. 갈 곳이 있으면 일찍 가는 것이 길합니다.',a:'맺힌 것을 풀고 지난 허물을 용서하며 빨리 매듭지으십시오.'},
+'110001':{n:41,k:'산택손',h:'山澤損',key:'덜어냄',t:'아래를 덜어 위를 더하는 괘입니다. 믿음이 있으면 크게 길하니, 검소한 정성으로 덜어 쓰면 이롭습니다.',a:'욕심을 덜고 분노를 줄여 본질에 집중하십시오.'},
+'100011':{n:42,k:'풍뢰익',h:'風雷益',key:'더함, 보탬',t:'위를 덜어 아래를 더하는 베풂의 괘입니다. 나아갈 바를 두면 이롭고 큰 강을 건너도 이롭습니다.',a:'좋은 것을 보면 옮겨가고 허물이 있으면 고치며 적극 베푸십시오.'},
+'111110':{n:43,k:'택천쾌',h:'澤天夬',key:'결단',t:'못이 하늘 위에 오른 듯 터질 듯한 결단의 괘입니다. 진실로 호소하되, 무력으로만 밀어붙이면 위태롭습니다.',a:'단호히 결단하되 명분을 밝히고 절제하십시오.'},
+'011111':{n:44,k:'천풍구',h:'天風姤',key:'우연한 만남',t:'하늘 아래 바람이 불어 뜻밖에 만나는 괘입니다. 기운이 지나치게 강성하니, 깊이 엮이지 않는 것이 좋습니다.',a:'갑작스런 유혹과 만남을 경계하고 처음에 절제하십시오.'},
+'000110':{n:45,k:'택지췌',h:'澤地萃',key:'모임',t:'못이 땅 위에 모이듯 사람과 재물이 모이는 괘입니다. 정성으로 모으면 형통합니다.',a:'바른 명분으로 모으고 뜻밖의 변에 미리 대비하십시오.'},
+'011000':{n:46,k:'지풍승',h:'地風升',key:'올라감, 성장',t:'땅속에서 나무가 자라 오르는 상승의 괘입니다. 크게 형통하니, 큰 사람을 만나 나아가면 길합니다.',a:'한 걸음씩 차근차근 위로 나아가십시오.'},
+'010110':{n:47,k:'택수곤',h:'澤水困',key:'곤궁함',t:'못의 물이 새어 메마른 곤경의 괘입니다. 곤궁해도 형통할 수 있으니, 바른 사람은 변명하기보다 묵묵히 견딥니다.',a:'말이 통하지 않는 때이니 행동과 인내로 곤경을 지나십시오.'},
+'011010':{n:48,k:'수풍정',h:'水風井',key:'우물',t:'나무로 물을 길어 올리는 우물의 괘입니다. 마을은 바뀌어도 우물은 변치 않으니, 끝까지 길어 올리는 것이 중요합니다.',a:'변치 않는 근본을 지키고 두루 베풀되 끝까지 마무리하십시오.'},
+'101110':{n:49,k:'택화혁',h:'澤火革',key:'변혁',t:'못 속의 불처럼 묵은 것을 바꾸는 혁신의 괘입니다. 때가 무르익어 믿음을 얻으면 크게 형통하니 후회가 사라집니다.',a:'때를 보아 낡은 것을 과감히 바꾸되 신뢰를 먼저 얻으십시오.'},
+'011101':{n:50,k:'화풍정',h:'火風鼎',key:'솥, 새로움을 빚음',t:'나무에 불을 붙여 음식을 익히는 솥의 괘입니다. 묵은 것을 새것으로 빚어내니 크게 형통하고 길합니다.',a:'바른 자리를 지키며 인재와 새로움을 길러내십시오.'},
+'100100':{n:51,k:'중뢰진',h:'重雷震',key:'진동, 놀람',t:'우레가 거듭 치는 놀람의 괘입니다. 놀라 두려워하다가도 곧 웃고 말하니, 놀라도 침착함을 잃지 않으면 길합니다.',a:'갑작스런 충격에 놀라되 곧 마음을 가다듬어 삼가십시오.'},
+'001001':{n:52,k:'중산간',h:'重山艮',key:'멈춤',t:'산이 거듭 멈춰 선 그침의 괘입니다. 멈추어 욕심을 보지 않으면 허물이 없습니다.',a:'멈출 때 멈추고 망령된 생각을 그치십시오.'},
+'001011':{n:53,k:'풍산점',h:'風山漸',key:'점진',t:'산 위에 나무가 자라듯 차근차근 나아가는 괘입니다. 기러기가 차례로 날 듯 순서를 밟으면 길합니다.',a:'건너뛰지 말고 순서대로 차근차근 나아가십시오.'},
+'110100':{n:54,k:'뇌택귀매',h:'雷澤歸妹',key:'잘못된 결합',t:'못 위에 우레가 치듯 정도를 벗어난 결합의 괘입니다. 그대로 나아가면 흉하니 이로울 바가 없습니다.',a:'눈앞의 욕심으로 정도를 벗어나지 말고 끝을 미리 보십시오.'},
+'101100':{n:55,k:'뇌화풍',h:'雷火豐',key:'풍성함의 절정',t:'우레와 번개가 함께한 풍성함의 절정 괘입니다. 형통하나 해가 중천에 뜨면 기우니, 가득 찬 때를 근심해야 합니다.',a:'풍성할 때 자만하지 말고 기우는 때를 대비하십시오.'},
+'001101':{n:56,k:'화산려',h:'火山旅',key:'나그네',t:'산 위에 불이 머물지 못하듯 떠도는 나그네의 괘입니다. 작게 형통하니, 겸손하고 바르게 처신해야 길합니다.',a:'낯선 곳에선 몸을 낮추고 분수를 지키십시오.'},
+'011011':{n:57,k:'중풍손',h:'重風巽',key:'공손히 따름, 스며듦',t:'바람이 거듭 부드럽게 스며드는 괘입니다. 작게 형통하니, 나아갈 바를 두고 큰 사람을 만나면 이롭습니다.',a:'부드럽게 파고들되 줏대를 잃지 말고 바름을 따르십시오.'},
+'110110':{n:58,k:'중택태',h:'重澤兌',key:'기쁨',t:'못이 잇닿아 서로 적시는 기쁨의 괘입니다. 진실한 기쁨으로 어울리면 형통하고 이롭습니다.',a:'기쁨을 나누되 바름을 지키고 아첨을 멀리하십시오.'},
+'010011':{n:59,k:'풍수환',h:'風水渙',key:'흩어짐',t:'바람이 물 위에 불어 얼음이 풀리듯 흩어지는 괘입니다. 형통하니, 정성으로 모으면 흩어진 것을 다시 모을 수 있습니다.',a:'막힌 마음을 풀고 사사로움을 흩어 크게 모으십시오.'},
+'110010':{n:60,k:'수택절',h:'水澤節',key:'절제',t:'못의 물을 알맞게 가두는 절제의 괘입니다. 형통하나, 괴로운 절제는 오래 지킬 수 없습니다.',a:'지나치지도 모자라지도 않게 알맞게 절제하십시오.'},
+'110011':{n:61,k:'풍택중부',h:'風澤中孚',key:'마음속 믿음',t:'못 위에 바람이 부니 속에 진실한 믿음이 가득한 괘입니다. 정성이 미물에까지 미치면 길하여 큰 강을 건너도 이롭습니다.',a:'진실한 믿음으로 사람을 감동시키십시오.'},
+'001100':{n:62,k:'뇌산소과',h:'雷山小過',key:'조금 지나침',t:'산 위에 우레가 치되 작게 지나치는 괘입니다. 작은 일은 길하나 큰일은 마땅치 않으니, 나는 새가 위로 가면 흉하고 내려오면 길합니다.',a:'큰 욕심을 내지 말고 겸손하게 작은 일에 충실하십시오.'},
+'101010':{n:63,k:'수화기제',h:'水火旣濟',key:'이미 이룸',t:'물과 불이 제자리를 얻어 이미 이루어진 괘입니다. 작은 것이 형통하나, 처음은 길해도 끝에 어지러워지기 쉽습니다.',a:'이루었을 때 방심하지 말고 끝까지 삼가십시오.'},
+'010101':{n:64,k:'화수미제',h:'火水未濟',key:'아직 이루지 못함',t:'불은 위로 물은 아래로 가 아직 건너지 못한 괘입니다. 형통할 수 있으나, 어린 여우가 강을 거의 건너다 꼬리를 적시듯 마무리가 중요합니다.',a:'끝까지 신중히 하여 마지막 한 걸음을 그르치지 마십시오.'}
+};
+const TRI = {
+'111':{n:'건(乾)',e:'하늘'},'110':{n:'태(兌)',e:'못'},'101':{n:'리(離)',e:'불'},'100':{n:'진(震)',e:'우레'},
+'011':{n:'손(巽)',e:'바람'},'010':{n:'감(坎)',e:'물'},'001':{n:'간(艮)',e:'산'},'000':{n:'곤(坤)',e:'땅'}
+};
+const POS = ['초효','이효','삼효','사효','오효','상효'];
+const reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+const $ = id => document.getElementById(id);
+let lines = [];   // {yang:bool, moving:bool} bottom->top
+let step = 0;
+
+// build coin elements
+function buildCoins(){
+  const c = $('coins'); c.innerHTML='';
+  for(let i=0;i<3;i++){
+    c.insertAdjacentHTML('beforeend',
+      `<div class="coin"><div class="coin-inner">
+        <div class="face front"><span class="hole"></span>
+          <span class="ch t">乾</span><span class="ch b">坤</span><span class="ch l">陽</span><span class="ch r">明</span></div>
+        <div class="face back"><span class="hole"></span></div>
+      </div></div>`);
+  }
+}
+// build empty line slots (top line first in DOM = line6 ... line1)
+function buildSlots(){
+  const w=$('lines'); w.innerHTML='';
+  for(let i=5;i>=0;i--){
+    w.insertAdjacentHTML('beforeend',
+      `<div class="ln" data-i="${i}"><span class="mark"></span><span class="seg"></span></div>`);
+  }
+}
+
+function startCast(){
+  lines=[]; step=0;
+  $('intro').classList.add('hidden');
+  $('result').classList.add('hidden');
+  $('cast').classList.remove('hidden');
+  buildCoins(); buildSlots();
+  $('prog').textContent='제 1 효';
+  $('note').textContent='동전 세 닢을 던져 아래에서부터 한 효씩 세웁니다.';
+  $('toss').textContent='동전 던지기';
+  $('toss').disabled=false;
+  $('toss').onclick=tossOnce;
+}
+
+function tossOnce(){
+  $('toss').disabled=true;
+  // three coins: each face value 2 (back) or 3 (front)
+  const coins=[...$('coins').children];
+  const vals=[];
+  coins.forEach(c=>{
+    const front = Math.random()<0.5;       // front shown = value 3
+    vals.push(front?3:2);
+    const spins = 3 + Math.floor(Math.random()*2); // 3 or 4 full turns
+    const midY  = Math.random()*180-90;
+    const endY  = spins*360 + (front?0:180);
+    const inner = c.querySelector('.coin-inner');
+    // final resting orientation (front or back facing viewer)
+    const rest = `rotateX(0deg) rotateY(${front?0:180}deg)`;
+    if(reduce){
+      inner.style.transition='none';
+      inner.style.transform = rest;
+    } else {
+      // Use the Web Animations API with concrete numeric values.
+      // (CSS custom properties inside @keyframes do NOT animate on iOS Safari.)
+      const anim = inner.animate([
+        { transform:'translateY(0) rotateX(0deg) rotateY(0deg)' },
+        { transform:`translateY(-46px) rotateX(220deg) rotateY(${midY}deg)`, offset:.35 },
+        { transform:`translateY(0) rotateX(360deg) rotateY(${endY}deg)` }
+      ], { duration:900, easing:'cubic-bezier(.3,.7,.3,1)', fill:'forwards' });
+      anim.onfinish = () => { inner.style.transform = rest; };
+    }
+  });
+  const finish=()=>{
+    const sum = vals[0]+vals[1]+vals[2];   // 6,7,8,9
+    const yang = (sum%2===1);              // 7,9 yang ; 6,8 yin
+    const moving = (sum===6||sum===9);
+    lines[step]={yang,moving};
+    drawLine(step,{yang,moving});
+    const label = sum===9?'노양(老陽) ⚊⟳':sum===6?'노음(老陰) ⚋⟳':sum===7?'소양(少陽) ⚊':'소음(少陰) ⚋';
+    $('note').innerHTML = `${POS[step]} — <b>${label}</b>` + (moving?' · 변하는 효':'');
+    step++;
+    if(step<6){
+      $('prog').textContent=`제 ${'一二三四五六'[step]} 효`;
+      $('toss').disabled=false;
+    }else{
+      $('prog').textContent='여섯 효를 모두 얻었습니다';
+      $('toss').textContent='괘 풀이 보기';
+      $('toss').disabled=false;
+      $('toss').onclick=showResult;
+    }
+  };
+  if(reduce) finish();
+  else setTimeout(finish, 920);
+}
+
+function drawLine(i, ln){
+  const el = $('lines').querySelector(`.ln[data-i="${i}"]`);
+  el.classList.add('set','draw', ln.yang?'yang':'yin');
+  if(ln.moving) el.classList.add('moving');
+  const mk = ln.moving ? (ln.yang?'○':'×') : '';
+  if(ln.yang){
+    el.querySelector('.mark').textContent = mk;
+    el.querySelector('.seg').style.width='64px';
+  }else{
+    el.innerHTML = `<span class="mark">${mk}</span>`+
+      `<span class="seg" style="width:27px"></span><span class="gap"></span><span class="seg" style="width:27px"></span>`;
+  }
+}
+
+// render a hexagram glyph (lines bottom->top array of {yang,moving})
+function glyph(arr, showMoving){
+  let h='<div class="glyphs">';
+  for(let i=5;i>=0;i--){
+    const L=arr[i]; const mv = showMoving&&L.moving;
+    const mk = mv?(L.yang?'○':'×'):'';
+    if(L.yang){
+      h+=`<div class="gl ${mv?'mv':''}"><span class="mk">${mk}</span><span class="bar full"></span></div>`;
+    }else{
+      h+=`<div class="gl ${mv?'mv':''}"><span class="mk">${mk}</span><span class="bar half"></span><span class="gp"></span><span class="bar half"></span></div>`;
+    }
+  }
+  return h+'</div>';
+}
+
+function keyOf(arr){ return arr.map(l=>l.yang?'1':'0').join(''); }
+
+function hexCard(arr, hx, opts){
+  const lo=keyOf(arr).slice(0,3), up=keyOf(arr).slice(3,6);
+  const tl=TRI[up], bt=TRI[lo];
+  return `<div class="card">
+    <p class="no">第 ${hx.n} 卦${opts.tag?' · '+opts.tag:''}</p>
+    <h1 class="nm">${hx.k}<small>${hx.h}</small></h1>
+    <div class="trig"><span>상괘 <b>${tl.n}</b> ${tl.e}</span><span>하괘 <b>${bt.n}</b> ${bt.e}</span></div>
+    ${glyph(arr, opts.showMoving)}
+    <span class="chip">${hx.key}</span>
+    <p>${hx.t}</p>
+    <p class="advice"><b>조언 —</b> ${hx.a}</p>
+    ${opts.seal?`<div class="seal">${opts.seal}</div>`:''}
+  </div>`;
+}
+
+function showResult(){
+  const primaryKey = keyOf(lines);
+  const primary = HEX[primaryKey];
+  const movers = lines.map((l,i)=>l.moving?i:-1).filter(i=>i>=0);
+  const q = $('q').value.trim();
+
+  let html = '';
+  if(q) html += `<p class="qline">물음 — <span>“${escapeHtml(q)}”</span></p>`;
+
+  html += hexCard(lines, primary, {tag:'본괘', showMoving:true, seal:'周易<br>之印'});
+
+  if(movers.length){
+    const changed = lines.map((l,i)=> movers.includes(i)? {yang:!l.yang,moving:false} : {yang:l.yang,moving:false});
+    const ckey = keyOf(changed);
+    const ch = HEX[ckey];
+    const names = movers.map(i=>{
+      const nine = lines[i].yang; // moving yang = 노양(9), moving yin = 노음(6)
+      return `${POS[i]}(${nine?'노양 9':'노음 6'})`;
+    }).join(', ');
+    html += `<div class="movenote">변하는 효 <b>${names}</b> 가 움직입니다. 이 자리가 지금 변화가 일어나는 지점이며, 본괘는 현재의 형국을, 아래 변괘는 일이 흘러가는 방향을 보여 줍니다.</div>`;
+    html += `<div class="arrow">― 변하여 <b>${ch.k}</b> 로 ―</div>`;
+    html += hexCard(changed, ch, {tag:'변괘 (之卦)', showMoving:false});
+  } else {
+    html += `<p class="nochange">변하는 효가 없으니, 본괘의 괘사 그대로 풀이합니다. 상황이 비교적 안정되어 있음을 뜻합니다.</p>`;
+  }
+
+  html += `<div class="actions">
+    <button class="btn" id="again">다시 점치기</button>
+  </div>`;
+
+  const sec = $('result');
+  sec.innerHTML = html;
+  $('cast').classList.add('hidden');
+  sec.classList.remove('hidden');
+  $('again').onclick = reset;
+  window.scrollTo({top:0, behavior: reduce?'auto':'smooth'});
+}
+
+function reset(){
+  $('result').classList.add('hidden');
+  $('cast').classList.add('hidden');
+  $('intro').classList.remove('hidden');
+  window.scrollTo({top:0, behavior:reduce?'auto':'smooth'});
+}
+
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+$('start').onclick = startCast;
+</script>
+</body>
+</html>
